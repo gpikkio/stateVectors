@@ -48,6 +48,27 @@ def webgeocalc(ut_start):
                           )
     return vectors.run()    
 
+def Horizon(ut_start,ut_end,step):
+
+    from astroquery.jplhorizons import Horizons
+    from astropy.coordinates import SkyCoord
+    from astropy import units as u
+    
+    mex = Horizons(id='-41',
+                   location='@0',
+                   epochs={'start':ut_start,'stop':ut_end,'step':step}
+                  )
+    tab = mex.vectors(refplane='earth')
+    xyz = SkyCoord(tab['x'].quantity.to(u.km),
+                   tab['y'].quantity.to(u.km),
+                   tab['z'].quantity.to(u.km),
+                   representation_type='cartesian',
+                   frame='icrs',
+                   obstime=ut_start)
+    print(xyz)
+    
+    return xyz
+
 
 def steps(step):
     if step[-1]=='s':
@@ -61,15 +82,22 @@ def steps(step):
 
 
 if __name__ == '__main__':
-    
+
     import pprint
     
     directory = '/home/cimo/Programs/makekey/SPICE/meta/'
     sc = 'MEX'
     
     utstart = '2018-06-04T02:37:10'
-    utend   = '2018-06-04T02:37:20'
-    step = steps('1s')
-    print(rect(directory,sc,utstart,utend,step))
-    pprint.pprint(webgeocalc(utstart))
+    utend   = '2018-06-04T02:38:20'
+
+    #step = steps('1s')
+    #print(rect(directory,sc,utstart,utend,step))
+
+    #pprint.pprint(webgeocalc(utstart))
+
+    step = '1m'
+    Horizon(utstart, utend, step)
+    
+    
     
