@@ -91,11 +91,20 @@ if __name__ == '__main__':
     utstart = '2018-06-04T02:37:10'
     utend   = '2018-06-04T02:38:20'
 
+    #
+    # State Vector via local SPICE kernels
+    #
     #step = steps('1s')
     #print(rect(directory,sc,utstart,utend,step))
 
+    #
+    # State Vector via webgeocalc API
+    #
     #pprint.pprint(webgeocalc(utstart))
 
+    #
+    # State Vector via JPL Horizons (via astroquery)
+    #
     step = '1m'
     Horizon(utstart, utend, step)
     
