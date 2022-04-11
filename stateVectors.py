@@ -34,6 +34,20 @@ def rect(prog_dir,target,ut_start,ut_end,interval):
     spice.kclear()
     
     
+def webgeocalc(ut_start):
+
+    from webgeocalc import StateVector
+    
+    vectors = StateVector(kernel_paths=['pds/data/mex-e_m-spice-6-v2.0/mexsp_2000/EXTRAS/MK/MEX_V03.TM'],
+                           times = ut_start,
+                           target='MEX',
+                           observer = 'SOLAR_SYSTEM_BARYCENTER',
+                           reference_frame='J2000',
+                           aberration_correction='NONE'
+                           #state_representation='RECTANGULAR')
+                          )
+    return vectors.run()    
+
 
 def steps(step):
     if step[-1]=='s':
@@ -47,6 +61,9 @@ def steps(step):
 
 
 if __name__ == '__main__':
+    
+    import pprint
+    
     directory = '/home/cimo/Programs/makekey/SPICE/meta/'
     sc = 'MEX'
     
@@ -54,4 +71,5 @@ if __name__ == '__main__':
     utend   = '2018-06-04T02:37:20'
     step = steps('1s')
     print(rect(directory,sc,utstart,utend,step))
+    pprint.pprint(webgeocalc(utstart))
     
