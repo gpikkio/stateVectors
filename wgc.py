@@ -52,7 +52,7 @@ if __name__ == '__main__':
             
         #date_re = re.compile('(\d{4})-(\d{2})-(\d{2}).(\d{2})\:(\d{2})\:(\d{2}.\d{3}).*(UTC|TDB)(.*)')
         date_re = re.compile('(.*).*(UTC|TDB)(.*)')
-        vects['DATE'] = vects['DATE'].str.extract(date_re)[0]
+        vects = vects.assign(DATE=vects['DATE'].str.extract(date_re)[0])
         np.savetxt(r'tmp.txt', vects.values, fmt='%s')
         with open(filename, 'w') as f:
             np.savetxt(filename, vects.values, fmt='%s')
