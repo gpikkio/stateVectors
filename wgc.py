@@ -2,7 +2,7 @@ def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem):
 
     from webgeocalc import StateVector
     
-    vectors = StateVector(kernel_paths=['pds/data/mex-e_m-spice-6-v2.0/mexsp_2000/EXTRAS/MK/MEX_V03.TM'],
+    vectors = StateVector(kernels=[findKernels(sc),1,2],
                           intervals=[ut_start, ut_end],
                           time_step = step,
                           time_step_units='SECONDS',
@@ -11,8 +11,21 @@ def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem):
                           time_system = timesystem,
                           reference_frame=ref,
                           aberration_correction='NONE'
-    )
+    ) 
     return vectors.run()
+
+def findKernels(sc):
+    import json
+    import urllib.request
+    from webgeocalc import API
+
+    link = API.url+'/kernel-sets'
+    with urllib.request.urlopen(link) as url:
+        kernelSets = json.loads(url.read().decode())
+        for i in range(len(kernelSets['items'])):
+            if sc.lower() in kernelSets['items'][i]['missionId'].lower() or sc.lower() in kernelSets['items'][i]['caption'].lower():
+                kernelSet = kernelSets['items'][i]['kernelSetId']
+    return int(kernelSet)
 
 def inputs(sc, frame):
     params = []
@@ -40,7 +53,7 @@ if __name__ == '__main__':
     import numpy as np
     import re
 
-    sc = 'MEX'
+    sc = 'MRO'
     rs = ['bcrs', 'gcrs', 'gtrs']
 
     for frames in range(len(rs)):
@@ -56,3 +69,5 @@ if __name__ == '__main__':
         np.savetxt(r'tmp.txt', vects.values, fmt='%s')
         with open(filename, 'w') as f:
             np.savetxt(filename, vects.values, fmt='%s')
+    
+    
