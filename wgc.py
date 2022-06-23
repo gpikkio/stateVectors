@@ -1,4 +1,4 @@
-def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem):
+def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem, state):
 
     import importlib
     
@@ -25,8 +25,9 @@ def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem):
                           observer = obs,
                           time_system = timesystem,
                           reference_frame=ref,
+                          state_representation=state,
                           aberration_correction='NONE'
-    ) 
+    )
     return vectors.run()
 
 
@@ -66,18 +67,22 @@ def inputs(sc, frame):
     obs= 'EARTH'
     ref = 'J2000'
     ts = 'UTC'
+    state_repr = 'RECTANGULAR'
+    steps = 1
     
     if frame == 'bcrs':
         obs = 'SOLAR_SYSTEM_BARYCENTER'
         ts = 'TDB'
     elif frame == 'gtrs':
         ref = 'EARTH_FIXED'
-                
+    elif frame =='geo':
+        state_repr = 'RA_DEC'
+        steps = 1200
+        
     utstart = '2020-06-04 02:37:10'
-    utend   = '2020-06-04 02:37:20'
-    steps=1
-
-    params = [sc, utstart, utend, steps, obs, ref, ts]
+    utend   = '2020-06-04 02:57:20'
+    
+    params = [sc, utstart, utend, steps, obs, ref, ts, state_repr]
     return params
 
 
@@ -86,23 +91,31 @@ if __name__ == '__main__':
 
     import pandas as pd
     import numpy as np
+    from astropy.coordinates import SkyCoord
     import re
 
     sc = 'mex'
-    rs = ['bcrs']#, 'gcrs', 'gtrs']
-
-    for frames in range(len(rs)):
-        filename = sc.lower()+'.'+rs[frames]+'.'+inputs(sc,rs[frames])[-1].lower()+'.'\
-            +inputs(sc,rs[frames])[1][2:4]+inputs(sc,rs[frames])[1][5:7]+inputs(sc,rs[frames])[1][8:10]+'.eph'
+    rs = ['geo']#'bcrs', 'gcrs', 'gtrs']
     
+    for frames in range(len(rs)):
         stateVectors=pd.DataFrame(webgeocalc(*inputs(sc,rs[frames])))
-        vects = stateVectors[['DATE','X','Y','Z','D_X_DT','D_Y_DT','D_Z_DT']]
+        if rs[frames] == 'geo':
+            filename = 'sources.coord'
+            coords =  stateVectors[['DATE', 'RIGHT_ASCENSION', 'DECLINATION']]
+            line = "source='"+sc.upper()+"' ra="+str(coords.at[0,'RIGHT_ASCENSION'])+" dec="+str(coords.at[1,'DECLINATION'])+" equinox='j2000' /\n"
+            with open(filename, 'w') as f:
+                for i in range(len(coords.DATE)):
+                    line = "source='"+sc.upper()+"' ra="+str(coords.at[i,'RIGHT_ASCENSION'])+" dec="+str(coords.at[i,'DECLINATION'])+" equinox='j2000' /\n"
+                    f.write(line)
+        else:
+            filename = sc.lower()+'.'+rs[frames]+'.'+inputs(sc,rs[frames])[-1].lower()+'.'\
+                +inputs(sc,rs[frames])[1][2:4]+inputs(sc,rs[frames])[1][5:7]+inputs(sc,rs[frames])[1][8:10]+'.eph'
+    
+            vects = stateVectors[['DATE','X','Y','Z','D_X_DT','D_Y_DT','D_Z_DT']]
             
-        #date_re = re.compile('(\d{4})-(\d{2})-(\d{2}).(\d{2})\:(\d{2})\:(\d{2}.\d{3}).*(UTC|TDB)(.*)')
-        date_re = re.compile('(.*).*(UTC|TDB)(.*)')
-        vects = vects.assign(DATE=vects['DATE'].str.extract(date_re)[0])
-        np.savetxt(r'tmp.txt', vects.values, fmt='%s')
-        with open(filename, 'w') as f:
-            np.savetxt(filename, vects.values, fmt='%s')
+            date_re = re.compile('(.*).*(UTC|TDB)(.*)')
+            vects = vects.assign(DATE=vects['DATE'].str.extract(date_re)[0])
+            with open(filename, 'w') as f:
+                np.savetxt(filename, vects.values, fmt='%s')
     
     
