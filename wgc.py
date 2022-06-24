@@ -16,7 +16,7 @@ def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem, state):
         kernel_leap = 2
 
     ap=API.url
-    print(ap)
+    print('\nUsing API: ', ap, '\n')
     vectors = StateVector(api=ap,kernels=[kernel_sc,kernel_solar,kernel_leap],
                           intervals=[ut_start, ut_end],
                           time_step = step,
@@ -92,20 +92,27 @@ if __name__ == '__main__':
     import pandas as pd
     import numpy as np
     from astropy.coordinates import SkyCoord
+    from astropy import units as u
     import re
 
     sc = 'mex'
-    rs = ['geo']#'bcrs', 'gcrs', 'gtrs']
+    rs = ['geo']#,'bcrs', 'gcrs', 'gtrs']
     
     for frames in range(len(rs)):
         stateVectors=pd.DataFrame(webgeocalc(*inputs(sc,rs[frames])))
         if rs[frames] == 'geo':
             filename = 'sources.coord'
             coords =  stateVectors[['DATE', 'RIGHT_ASCENSION', 'DECLINATION']]
-            line = "source='"+sc.upper()+"' ra="+str(coords.at[0,'RIGHT_ASCENSION'])+" dec="+str(coords.at[1,'DECLINATION'])+" equinox='j2000' /\n"
             with open(filename, 'w') as f:
                 for i in range(len(coords.DATE)):
-                    line = "source='"+sc.upper()+"' ra="+str(coords.at[i,'RIGHT_ASCENSION'])+" dec="+str(coords.at[i,'DECLINATION'])+" equinox='j2000' /\n"
+                    coord = SkyCoord(ra=coords.at[i,'RIGHT_ASCENSION']*u.degree,dec=coords.at[i,'DECLINATION']*u.degree)
+                    ra = str(int(coord.ra.hms[0])).zfill(2)+':'+str(int(coord.ra.hms[1])).zfill(2)+':'+'{:0>9.6f}'.format(abs(float(coord.ra.hms[2])))
+                    if coord.dec < 0:
+                        dec = str(abs(int(coord.dec.dms[0]))).zfill(2)+':'+str(abs(int(coord.dec.dms[1]))).zfill(2)+':'+'{:0>9.6f}'.format(abs(float(coord.dec.dms[2])))
+                        line = "source='"+sc.upper()+"' ra="+ra+" dec=-"+dec+" equinox='j2000' /\n"
+                    else:
+                        dec = str(int(coord.dec.dms[0])).zfill(2)+':'+str(int(coord.dec.dms[1])).zfill(2)+':'+'{:0>9.6f}'.format(abs(float(coord.dec.dms[2])))
+                        line = "source='"+sc.upper()+"' ra="+ra+" dec="+dec+" equinox='j2000' /\n"
                     f.write(line)
         else:
             filename = sc.lower()+'.'+rs[frames]+'.'+inputs(sc,rs[frames])[-1].lower()+'.'\
@@ -117,5 +124,4 @@ if __name__ == '__main__':
             vects = vects.assign(DATE=vects['DATE'].str.extract(date_re)[0])
             with open(filename, 'w') as f:
                 np.savetxt(filename, vects.values, fmt='%s')
-    
-    
+                
