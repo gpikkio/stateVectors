@@ -79,8 +79,8 @@ def inputs(sc, frame):
         state_repr = 'RA_DEC'
         steps = 1200
         
-    utstart = '2020-06-04 02:37:10'
-    utend   = '2020-06-04 02:57:20'
+    utstart = '2022-06-10 10:10:00'
+    utend   = '2022-06-10 11:10:00'
     
     params = [sc, utstart, utend, steps, obs, ref, ts, state_repr]
     return params
@@ -105,14 +105,16 @@ if __name__ == '__main__':
             coords =  stateVectors[['DATE', 'RIGHT_ASCENSION', 'DECLINATION']]
             with open(filename, 'w') as f:
                 for i in range(len(coords.DATE)):
+                    print(coords.at[i,'RIGHT_ASCENSION'], coords.at[i,'DECLINATION'])
+                    source = coords.at[i,'DATE'][11:13]+coords.at[i,'DATE'][14:16]+coords.at[i,'DATE'][17:19]
                     coord = SkyCoord(ra=coords.at[i,'RIGHT_ASCENSION']*u.degree,dec=coords.at[i,'DECLINATION']*u.degree)
-                    ra = str(int(coord.ra.hms[0])).zfill(2)+':'+str(int(coord.ra.hms[1])).zfill(2)+':'+'{:0>9.6f}'.format(abs(float(coord.ra.hms[2])))
+                    ra = str(int(coord.ra.hms[0])).zfill(2)+':'+str(int(coord.ra.hms[1])).zfill(2)+':'+'{:0>11.9f}'.format(abs(float(coord.ra.hms[2])))
                     if coord.dec < 0:
-                        dec = str(abs(int(coord.dec.dms[0]))).zfill(2)+':'+str(abs(int(coord.dec.dms[1]))).zfill(2)+':'+'{:0>9.6f}'.format(abs(float(coord.dec.dms[2])))
-                        line = "source='"+sc.upper()+"' ra="+ra+" dec=-"+dec+" equinox='j2000' /\n"
+                        dec = str(abs(int(coord.dec.dms[0]))).zfill(2)+':'+str(abs(int(coord.dec.dms[1]))).zfill(2)+':'+'{:0>10.7f}'.format(abs(float(coord.dec.dms[2])))
+                        line = "source='"+source+"' ra="+ra+" dec=-"+dec+" equinox='j2000' /\n"
                     else:
-                        dec = str(int(coord.dec.dms[0])).zfill(2)+':'+str(int(coord.dec.dms[1])).zfill(2)+':'+'{:0>9.6f}'.format(abs(float(coord.dec.dms[2])))
-                        line = "source='"+sc.upper()+"' ra="+ra+" dec="+dec+" equinox='j2000' /\n"
+                        dec = str(int(coord.dec.dms[0])).zfill(2)+':'+str(int(coord.dec.dms[1])).zfill(2)+':'+'{:0>10.7f}'.format(abs(float(coord.dec.dms[2])))
+                        line = "source='"+source+"' ra="+ra+" dec="+dec+" equinox='j2000' /\n"
                     f.write(line)
         else:
             filename = sc.lower()+'.'+rs[frames]+'.'+inputs(sc,rs[frames])[-1].lower()+'.'\
