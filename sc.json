@@ -1,0 +1,44 @@
+[
+	{
+   "NAIF ID": -28,
+   "Names": ["JUPITER ICY MOONS EXPLORER","JUICE"],
+   "API": "ESA",
+   "kernel_id": 17,
+   "mission_id": "juice_crema_5_0b23_1"
+ },
+ {
+   "NAIF ID": -41,
+   "Names": ["MEX","MARS EXPRESS"],
+   "API": "ESA",
+   "kernel_id": 10,
+   "mission_id": "mex_ops"
+ },
+ {
+   "NAIF ID": -121,
+   "Names": ["MERCURY PLANETARY ORBITER","MPO","BEPICOLOMBO MPO","BC","BEPICOLOMBO"],
+   "API": "ESA",
+   "kernel_id": 8,
+   "mission_id": "bc_ops"
+ },
+ {
+   "NAIF ID": -143,
+   "Names": ["TRACE GAS ORBITER","TGO","EXOMARS 2016 TGO","EM16"],
+   "API": "ESA",
+   "kernel_id": 6,
+   "mission_id": "em16_ops"
+ },
+ {
+   "NAIF ID": -53,
+   "Names": ["MARS PATHFINDER","MPF","MARS ODYSSEY","MARS SURVEYOR 01 ORBITER","ODY"],
+   "API": "NASA",
+   "kernel_id": 25,
+   "mission_id": "ody"
+ },
+ {
+   "NAIF ID": -74,
+   "Names": ["MRO","MARS RECON ORBITER"],
+   "API": "NASA",
+   "kernel_id": 26,
+   "mission_id": "mro"
+ }
+]
