@@ -2,9 +2,9 @@ def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem, state):
 
     import importlib
     
-    kernel_sc, apis = findKernels(sc)[0], findKernels(sc)[1]
+    sc_id, kernel_sc, apis = findKernels(sc)[3], findKernels(sc)[2], findKernels(sc)[0]
                 
-    if apis == 'ESA_API':
+    if apis == 'ESA':
         from webgeocalc import ESA_API as API
         from webgeocalc import StateVector
         kernel_solar = 3
@@ -21,7 +21,7 @@ def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem, state):
                           intervals=[ut_start, ut_end],
                           time_step = step,
                           time_step_units='SECONDS',
-                          target=sc,
+                          target=str(sc_id),
                           observer = obs,
                           time_system = timesystem,
                           reference_frame=ref,
@@ -33,33 +33,12 @@ def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem, state):
 
 def findKernels(sc):
     import json
-    import urllib.request
-    from webgeocalc import ESA_API
-    from webgeocalc import API
-
-    if sc.lower() == 'tgo':
-        sc = 'em16'
-    s = sc+'_ops'
-    link_esa = ESA_API.url+'/kernel-sets'
-    link_nasa = API.url+'/kernel-sets'
-    kernelSet = ''
-    api = ''
-    with urllib.request.urlopen(link_esa) as url:
-        kernelSets = json.loads(url.read().decode())
-        for i in range(len(kernelSets['items'])):
-            if sc.lower() in kernelSets['items'][i]['missionId'].lower():
-                api = 'ESA_API'
-                if s.lower() in kernelSets['items'][i]['missionId'].lower() or s.lower() in kernelSets['items'][i]['caption'].lower():
-                    kernelSet = kernelSets['items'][i]['kernelSetId']
-        if api == '':
-            api = 'NASA_API'
-            with urllib.request.urlopen(link_nasa) as url:
-                kernelSets = json.loads(url.read().decode())
-                for i in range(len(kernelSets['items'])):
-                    if sc.lower() in kernelSets['items'][i]['missionId'].lower() or sc.lower() in kernelSets['items'][i]['caption'].lower():
-                        kernelSet = kernelSets['items'][i]['kernelSetId']
-                             
-    return int(kernelSet), api
+    with open('sc.json') as sc_file:
+        data = json.load(sc_file)
+        for i in range(len(data)):
+            if sc.upper() in data[i]['Names']:
+                kernel_data = data[i]['API'], data[i]['mission_id'], data[i]['kernel_id'], data[i]['NAIF ID']
+    return kernel_data
 
 
 def inputs(sc, frame):
@@ -94,9 +73,10 @@ if __name__ == '__main__':
     from astropy.coordinates import SkyCoord
     from astropy import units as u
     import re
-
+    
     sc = 'mex'
     rs = ['geo']#,'bcrs', 'gcrs', 'gtrs']
+    #print(findKernel(sc))
     
     for frames in range(len(rs)):
         stateVectors=pd.DataFrame(webgeocalc(*inputs(sc,rs[frames])))
