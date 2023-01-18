@@ -57,6 +57,9 @@ def inputs(sc, frame):
     elif frame =='geo':
         state_repr = 'RA_DEC'
         steps = 1200
+    elif frame == 'orb':
+        obs='MARS'
+        steps = 20
         
     utstart = '2022-06-10 10:10:00'
     utend   = '2022-06-10 11:10:00'
@@ -75,8 +78,8 @@ if __name__ == '__main__':
     import re
     
     sc = 'mex'
-    rs = ['geo']#,'bcrs', 'gcrs', 'gtrs']
-    #print(findKernel(sc))
+    ### rs = ['geo','bcrs', 'gcrs', 'gtrs','orb'] ###
+    rs = ['geo','bcrs', 'gcrs', 'gtrs','orb']
     
     for frames in range(len(rs)):
         stateVectors=pd.DataFrame(webgeocalc(*inputs(sc,rs[frames])))
