@@ -79,7 +79,7 @@ if __name__ == '__main__':
     
     sc = 'mex'
     ### rs = ['geo','bcrs', 'gcrs', 'gtrs','orb'] ###
-    rs = ['geo','bcrs', 'gcrs', 'gtrs','orb']
+    rs = ['bcrs']#, 'gcrs', 'gtrs','orb']
     
     for frames in range(len(rs)):
         stateVectors=pd.DataFrame(webgeocalc(*inputs(sc,rs[frames])))
@@ -88,7 +88,6 @@ if __name__ == '__main__':
             coords =  stateVectors[['DATE', 'RIGHT_ASCENSION', 'DECLINATION']]
             with open(filename, 'w') as f:
                 for i in range(len(coords.DATE)):
-                    print(coords.at[i,'RIGHT_ASCENSION'], coords.at[i,'DECLINATION'])
                     source = coords.at[i,'DATE'][11:13]+coords.at[i,'DATE'][14:16]+coords.at[i,'DATE'][17:19]
                     coord = SkyCoord(ra=coords.at[i,'RIGHT_ASCENSION']*u.degree,dec=coords.at[i,'DECLINATION']*u.degree)
                     ra = str(int(coord.ra.hms[0])).zfill(2)+':'+str(int(coord.ra.hms[1])).zfill(2)+':'+'{:0>11.9f}'.format(abs(float(coord.ra.hms[2])))
@@ -104,9 +103,10 @@ if __name__ == '__main__':
                 +inputs(sc,rs[frames])[1][2:4]+inputs(sc,rs[frames])[1][5:7]+inputs(sc,rs[frames])[1][8:10]+'.eph'
     
             vects = stateVectors[['DATE','X','Y','Z','D_X_DT','D_Y_DT','D_Z_DT']]
-            
             date_re = re.compile('(.*).*(UTC|TDB)(.*)')
             vects = vects.assign(DATE=vects['DATE'].str.extract(date_re)[0])
+            vects['DATE'] = pd.to_datetime(vects['DATE'],format='%Y-%m-%d %H:%M:%S')
+            vects['DATE'] = vects['DATE'].astype('datetime64').dt.strftime('%Y %m %d %H %M %S.%f')
             with open(filename, 'w') as f:
                 np.savetxt(filename, vects.values, fmt='%s')
                 
