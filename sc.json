@@ -10,7 +10,7 @@
    "NAIF ID": -41,
    "Names": ["MEX","MARS EXPRESS"],
    "API": "ESA",
-   "kernel_id": 10,
+   "kernel_id": 11,
    "mission_id": "mex_ops"
  },
  {
