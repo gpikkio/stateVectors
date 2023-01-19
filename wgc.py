@@ -41,7 +41,7 @@ def findKernels(sc):
     return kernel_data
 
 
-def inputs(sc, frame):
+def inputs(sc, utstart, utend, frame):
     params = []
     obs= 'EARTH'
     ref = 'J2000'
@@ -60,16 +60,11 @@ def inputs(sc, frame):
     elif frame == 'orb':
         obs='MARS'
         steps = 20
-        
-    utstart = '2022-06-10 10:10:00'
-    utend   = '2022-06-10 11:10:00'
-    
+         
     params = [sc, utstart, utend, steps, obs, ref, ts, state_repr]
     return params
 
-
-
-if __name__ == '__main__':
+def calc(sc,ut1,ut2,rs):
 
     import pandas as pd
     import numpy as np
@@ -77,12 +72,8 @@ if __name__ == '__main__':
     from astropy import units as u
     import re
     
-    sc = 'mex'
-    ### rs = ['geo','bcrs', 'gcrs', 'gtrs','orb'] ###
-    rs = ['bcrs']#, 'gcrs', 'gtrs','orb']
-    
     for frames in range(len(rs)):
-        stateVectors=pd.DataFrame(webgeocalc(*inputs(sc,rs[frames])))
+        stateVectors=pd.DataFrame(webgeocalc(*inputs(sc,ut1,ut2,rs[frames])))
         if rs[frames] == 'geo':
             filename = 'sources.coord'
             coords =  stateVectors[['DATE', 'RIGHT_ASCENSION', 'DECLINATION']]
@@ -99,8 +90,8 @@ if __name__ == '__main__':
                         line = "source='"+source+"' ra="+ra+" dec="+dec+" equinox='j2000' /\n"
                     f.write(line)
         else:
-            filename = sc.lower()+'.'+rs[frames]+'.'+inputs(sc,rs[frames])[-1].lower()+'.'\
-                +inputs(sc,rs[frames])[1][2:4]+inputs(sc,rs[frames])[1][5:7]+inputs(sc,rs[frames])[1][8:10]+'.eph'
+            filename = sc.lower()+'.'+rs[frames]+'.'+inputs(sc,ut1,ut2,rs[frames])[-1].lower()+'.'\
+                +inputs(sc,ut1,ut2,rs[frames])[1][2:4]+inputs(sc,ut1,ut2,rs[frames])[1][5:7]+inputs(sc,ut1,ut2,rs[frames])[1][8:10]+'.eph'
     
             vects = stateVectors[['DATE','X','Y','Z','D_X_DT','D_Y_DT','D_Z_DT']]
             date_re = re.compile('(.*).*(UTC|TDB)(.*)')
@@ -110,3 +101,12 @@ if __name__ == '__main__':
             with open(filename, 'w') as f:
                 np.savetxt(filename, vects.values, fmt='%s')
                 
+
+if __name__ == '__main__':
+    
+    spacecraft = 'mex'
+    ### typeCoord = ['geo','bcrs', 'gcrs', 'gtrs','orb'] ###
+    typeCoord = ['bcrs']#, 'gcrs', 'gtrs','orb']
+    utStart = '2022-06-10 10:10:00'
+    utEnd   = '2022-06-10 11:10:00'
+    calc(spacecraft,utStart,utEnd,typeCoord)
