@@ -81,7 +81,7 @@ def calc(sc,ut1,ut2,rs):
                 for i in range(len(coords.DATE)):
                     source = coords.at[i,'DATE'][11:13]+coords.at[i,'DATE'][14:16]+coords.at[i,'DATE'][17:19]
                     coord = SkyCoord(ra=coords.at[i,'RIGHT_ASCENSION']*u.degree,dec=coords.at[i,'DECLINATION']*u.degree)
-                    ra = str(int(coord.ra.hms[0])).zfill(2)+':'+str(int(coord.ra.hms[1])).zfill(2)+':'+'{:0>11.9f}'.format(abs(float(coord.ra.hms[2])))
+                    ra = str(int(coord.ra.hms[0])).zfill(2)+':'+str(int(coord.ra.hms[1])).zfill(2)+':'+'{:0>12.9f}'.format(abs(float(coord.ra.hms[2])))
                     if coord.dec < 0:
                         dec = str(abs(int(coord.dec.dms[0]))).zfill(2)+':'+str(abs(int(coord.dec.dms[1]))).zfill(2)+':'+'{:0>10.7f}'.format(abs(float(coord.dec.dms[2])))
                         line = "source='"+source+"' ra="+ra+" dec=-"+dec+" equinox='j2000' /\n"
@@ -104,9 +104,9 @@ def calc(sc,ut1,ut2,rs):
 
 if __name__ == '__main__':
     
-    spacecraft = 'mex'
+    spacecraft = 'juice'
     ### typeCoord = ['geo','bcrs', 'gcrs', 'gtrs','orb'] ###
-    typeCoord = ['bcrs']#, 'gcrs', 'gtrs','orb']
-    utStart = '2022-06-10 10:10:00'
-    utEnd   = '2022-06-10 11:10:00'
+    typeCoord = ['geo']
+    utStart = '2024-01-10 10:10:00'
+    utEnd   = '2024-02-10 11:10:00'
     calc(spacecraft,utStart,utEnd,typeCoord)
