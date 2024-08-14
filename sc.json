@@ -3,7 +3,7 @@
    "NAIF ID": -28,
    "Names": ["JUPITER ICY MOONS EXPLORER","JUICE"],
    "API": "ESA",
-   "kernel_id": 22,
+   "kernel_id": 24,
    "mission_id": "juice_ops"
  },
  {
