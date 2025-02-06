@@ -1,4 +1,69 @@
 def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem, state):
+    # Define the webgeocalc function to calculate state vectors
+    
+    """
+    Calculate state vectors using the webgeocalc API.
+
+    Parameters
+    ----------
+    sc : str
+        Spacecraft ID (e.g., 'MEX', 'JUICE', etc.)
+    ut_start : str
+        Start time in UTC format (e.g., '2018-06-04T02:37:10')
+    ut_end : str
+        End time in UTC format (e.g., '2018-06-04T02:38:20')
+    step : str
+        Time step in seconds (e.g., '10s', '1m', etc.)
+    obs : str
+        Observer (e.g., 'EARTH', 'SOLAR_SYSTEM_BARYCENTER', etc.)
+    ref : str
+        Reference frame (e.g., 'J2000', 'EARTH_FIXED', etc.)
+    timesystem : str
+        Time system (e.g., 'TDB', 'UTC', etc.)
+    state : str
+        State representation (e.g., 'RECTANGULAR', 'RA_DEC', etc.)
+
+    Returns
+    -------
+    A pandas DataFrame containing the state vectors in the specified state representation.
+    """
+
+    import importlib
+    
+    # Get spacecraft ID, kernel ID, and API type from findKernels function
+    sc_id, kernel_sc, apis = findKernels(sc)[3], findKernels(sc)[2], findKernels(sc)[0]
+                
+    # Determine API and kernel IDs based on API type
+    if apis == 'ESA':
+        from webgeocalc import ESA_API as API
+        from webgeocalc import StateVector
+        kernel_solar = 3
+        kernel_leap = 4
+    else:
+        from webgeocalc import API
+        from webgeocalc import StateVector
+        kernel_solar = 1
+        kernel_leap = 2
+
+    # Get API URL
+    ap=API.url
+    print('\nUsing API: ', ap, '\n')
+    
+    # Create StateVector object with API, kernel IDs, and calculation parameters
+    vectors = StateVector(api=ap,kernels=[kernel_sc,kernel_solar,kernel_leap],
+                          intervals=[ut_start, ut_end],
+                          time_step = step,
+                          time_step_units='SECONDS',
+                          target=str(sc_id),
+                          observer = obs,
+                          time_system = timesystem,
+                          reference_frame=ref,
+                          state_representation=state,
+                          aberration_correction='NONE'
+    )
+    
+    # Run the state vector calculation and return the result
+    return vectors.run()def webgeocalc(sc, ut_start, ut_end, step, obs, ref, timesystem, state):
 
     import importlib
     
@@ -107,6 +172,6 @@ if __name__ == '__main__':
     spacecraft = 'juice'
     ### typeCoord = ['geo','bcrs', 'gcrs', 'gtrs','orb'] ###
     typeCoord = ['geo']
-    utStart = '2024-01-10 10:10:00'
-    utEnd   = '2024-02-10 11:10:00'
+    utStart = '2025-08-31 04:00:00'
+    utEnd   = '2025-08-31 14:00:00'
     calc(spacecraft,utStart,utEnd,typeCoord)
